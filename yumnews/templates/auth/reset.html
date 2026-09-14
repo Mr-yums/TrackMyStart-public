@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Nouveau mot de passe{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Nouveau mot de passe</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.password.label }}{{ form.password(class_="input", autocomplete="new-password") }}{% for e in form.password.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+    <div class="field">{{ form.confirm.label }}{{ form.confirm(class_="input", autocomplete="new-password") }}{% for e in form.confirm.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+    <button class="btn btn-primary btn-block" type="submit">Enregistrer</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# [Sol] Exécuté en root sur le VPS depuis une copie de confiance de ce script.
+# Usage : ops/deploy-server IMAGE RELEASE_ID
+set -Eeuo pipefail
+umask 077
+ROOT=${TRACKMYSTART_ROOT:-/opt/trackmystart}
+CONFIG=${TRACKMYSTART_CONFIG:-/etc/trackmystart}
+IMAGE=${1:?Image Docker requise}
+RELEASE=${2:?Identifiant requis}
+[[ "$RELEASE" =~ ^[a-f0-9]{12,40}$ ]] || { echo 'Identifiant de commit invalide'; exit 1; }
+mkdir -p "$ROOT"/{proxy,releases,backups}
+exec 9>"$ROOT/deploy.lock"
+flock -n 9 || { echo 'Déploiement déjà en cours'; exit 1; }
+cd "$ROOT"
+COMPOSE=(docker compose -f "$ROOT/compose.yml")
+CANDIDATE="trackmystart-$RELEASE"
+PREVIOUS=$(cat "$ROOT/current" 2>/dev/null || true)
+[[ "$PREVIOUS" != "$CANDIDATE" ]] || { echo 'Cette version est déjà active'; exit 0; }
+[[ -f "$CONFIG/app.env" && -f "$CONFIG/db_password" ]]
+# Image identifiée par son digest local pour éviter le changement d'un tag entre tests et lancement.
+IMAGE=$(docker image inspect --format '{{.Id}}' "$IMAGE")
+docker run --rm --network none --tmpfs /tmp:exec "$IMAGE" bash scripts/quality-gate
+SCHEMA=$(docker run --rm --network none "$IMAGE" python ops/schema.py)
+if [[ -f "$ROOT/schema" && "$SCHEMA" != "$(cat "$ROOT/schema")" ]]; then
+  echo 'REFUS : schéma modifié. Préparer une migration compatible et sa restauration.' >&2
+  exit 1
+fi
+"${COMPOSE[@]}" up -d --wait db
+# Sauvegarde avant toute bascule ; un échec bloque le déploiement.
+"${COMPOSE[@]}" exec -T db pg_dump -U trackmystart -d trackmystart -Fc > "$ROOT/backups/before-$RELEASE.dump"
+test -s "$ROOT/backups/before-$RELEASE.dump"
+# [Sol] Campagne persistante hors des images, writable uniquement par l'application.
+install -d -m 700 -o 10001 -g 10001 "$ROOT/data/advertising"
+if [[ -f "$ROOT/data/advertising/advertising.json" ]]; then
+  cp -p "$ROOT/data/advertising/advertising.json" "$ROOT/backups/advertising-before-$RELEASE.json"
+fi
+if [[ ! -f "$ROOT/schema" ]]; then
+  docker run --rm --network trackmystart_backend --env-file "$CONFIG/app.env" "$IMAGE" flask --app app init-db
+fi
+SWITCHED=0
+SUCCESS=0
+cleanup() {
+  status=$?
+  if [[ "$SUCCESS" != 1 ]]; then
+    if [[ "$SWITCHED" == 1 && -f "$ROOT/proxy/previous" ]]; then
+      cp "$ROOT/proxy/previous" "$ROOT/proxy/Caddyfile"
+      "${COMPOSE[@]}" exec -T proxy caddy reload --config /etc/caddy/Caddyfile || true
+    elif [[ "$SWITCHED" == 1 ]]; then
+      "${COMPOSE[@]}" stop proxy || true
+    fi
+    docker rm -f "$CANDIDATE" >/dev/null 2>&1 || true
+    echo "REFUS : version $RELEASE non activée ; version précédente conservée." >&2
+  fi
+  exit "$status"
+}
+trap cleanup EXIT
+# Un candidat échoué d'un précédent essai ne doit pas bloquer la relance.
+docker rm -f "$CANDIDATE" >/dev/null 2>&1 || true
+docker run -d --name "$CANDIDATE" --restart unless-stopped \
+  --network trackmystart_backend --env-file "$CONFIG/app.env" \
+  --env "RELEASE_ID=$RELEASE" --env TRUSTED_PROXY_HOPS=1 --read-only --tmpfs /tmp \
+  --env ADS_CONFIG_PATH=/var/lib/trackmystart/advertising.json \
+  --mount "type=bind,src=$ROOT/data/advertising,dst=/var/lib/trackmystart" \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --memory 768m --cpus 1.5 "$IMAGE"
+READY=0
+for attempt in $(seq 1 30); do
+  if docker exec "$CANDIDATE" python ops/smoke.py >/dev/null 2>&1; then READY=1; break; fi
+  sleep 2
+done
+[[ "$READY" == 1 ]] || { echo 'Le candidat échoue aux contrôles HTTP/base/auth'; exit 1; }
+if [[ -f "$ROOT/proxy/Caddyfile" ]]; then cp "$ROOT/proxy/Caddyfile" "$ROOT/proxy/previous"; fi
+cat > "$ROOT/proxy/Caddyfile.next" <<CADDY
+trackmystart.de {
+  encode zstd gzip
+  import /etc/caddy/publisher/*.caddy
+  reverse_proxy $CANDIDATE:8800
+}
+www.trackmystart.de {
+  redir https://trackmystart.de{uri} permanent
+}
+CADDY
+docker run --rm --network trackmystart_backend -v "$ROOT/proxy:/etc/caddy:ro" caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile.next --adapter caddyfile
+mv "$ROOT/proxy/Caddyfile.next" "$ROOT/proxy/Caddyfile"
+SWITCHED=1
+"${COMPOSE[@]}" up -d proxy
+"${COMPOSE[@]}" exec -T proxy caddy reload --config /etc/caddy/Caddyfile
+PUBLIC_OK=0
+for attempt in $(seq 1 30); do
+  if docker exec "$CANDIDATE" python ops/smoke.py --url https://trackmystart.de >/dev/null 2>&1; then PUBLIC_OK=1; break; fi
+  sleep 2
+done
+[[ "$PUBLIC_OK" == 1 ]] || { echo 'Contrôle HTTPS public échoué'; exit 1; }
+printf '%s\n' "$SCHEMA" > "$ROOT/schema"
+printf '%s\n' "$CANDIDATE" > "$ROOT/current.next"
+mv "$ROOT/current.next" "$ROOT/current"
+printf '%s\n' "$IMAGE" > "$ROOT/releases/$RELEASE.image"
+SUCCESS=1
+# Ancienne version conservée pour retour arrière ; aucune suppression de données.
+echo "ACCEPTÉ : https://trackmystart.de — $RELEASE"

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Passer Premium{% endblock %}
+{% block head %}{% if card_config %}<script src="https://{{ 'sandbox.' if card_config.sandbox else '' }}web.squarecdn.com/v1/square.js"></script>{% endif %}{% endblock %}
+{% block content %}
+{# [Sol] Distinguer clairement le test de la facturation réelle. #}
+{% if card_config and card_config.sandbox %}<p class="flash flash-info">Mode test Square Sandbox : aucun débit réel.</p>{% endif %}
+<section class="page-hero">
+  <h1 class="page-title">Premium · {{ offer.price_label }} pour {{ offer.period_days }} jours</h1>
+  {% if subscription.active %}<p class="center muted">Votre accès Premium court jusqu'au {{ subscription.period_end[:10] }} ; un nouveau paiement ajoutera {{ offer.period_days }} jours à la suite.</p>{% endif %}
+</section>
+<div class="checkout-grid">
+  <section class="card-panel">
+    <h2>Ce que vous débloquez</h2>
+    <ul class="checklist">
+      <li>Toute la presse (anime, streaming, industrie)</li>
+      <li>Fil complet de vos acteurs suivis, sans limite de suivis</li>
+      <li>Rubrique Prochainement, saisons & épisodes</li>
+      <li>Planning anime complet, catalogue étendu</li>
+    </ul>
+    <p class="muted small">Paiement unique, sans reconduction automatique. Facture disponible dans votre compte.</p>
+  </section>
+  <section class="card-panel">
+    <h2>Code promo</h2>
+    <div class="coupon-row">
+      <input type="text" id="coupon" placeholder="Code promo" autocomplete="off">
+      <button class="btn btn-ghost" type="button" id="applyCoupon">Appliquer</button>
+    </div>
+    <p class="muted small" id="couponMsg" aria-live="polite"></p>
+    <hr>
+    {% if card_config %}
+      <h2>Carte bancaire</h2>
+      <div id="card-container"></div>
+      <button class="btn btn-primary btn-block" id="payBtn">Payer {{ offer.price_label }}</button>
+      <p class="field-error" id="payError" hidden></p>
+      <p class="muted small">Sécurisé par Square. 3-D Secure appliqué si votre banque l'exige.</p>
+    {% else %}
+      <h2>Carte bancaire</h2><p class="muted">Le paiement par carte n'est pas configuré sur cette instance.</p>
+    {% endif %}
+    {% for gw in hosted %}
+      <hr>
+      <h2>{{ gw.label }}</h2>
+      <form method="post" action="{{ url_for('billing.start_hosted', provider=gw.provider) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="coupon" class="coupon-sync"><button class="btn btn-ghost btn-block" type="submit">Payer en crypto</button></form>
+      <p class="muted small">Vous serez redirigé vers une page de paiement ; l'accès s'active dès confirmation du réseau.</p>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>window.BILLING_CONFIG = {{ {"devisUrl": url_for('billing.quote'), "baseLabel": offer.price_label}|tojson }};</script>
+<script type="module" src="{{ url_for('static', filename='js/coupon.js') }}"></script>
+{% if card_config %}
+<script>window.SQUARE_CONFIG = {{ {"appId": card_config.application_id, "locationId": card_config.location_id, "currency": offer.currency, "email": current_user.email, "payUrl": url_for('billing.pay_with_card')}|tojson }};</script>
+<script type="module" src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+{% endif %}{% endblock %}

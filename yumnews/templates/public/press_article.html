@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block body_class %}editorial-ui theme-{{ theme }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/editorial-polish.css') }}">{% endblock %}
+{% block title %}{{ article.title }}{% endblock %}
+{% block main_class %}reader-page{% endblock %}
+{% block content %}
+{# [Sol] Même lecteur que les brèves, attribution explicite de l'extrait RSS. #}
+<div class="reader-wrap">
+  <a class="reader-back" href="{{ url_for('dashboard.app') }}#home">← Retour à mon fil</a>
+  <header class="reader-header">
+    <p class="eyebrow">{{ category }} · {{ source.name }}</p>
+    <h1>{{ article.title }}</h1>
+    <div class="reader-meta"><span class="reader-status">Extrait transmis par la source</span>{% if article.date %}<time datetime="{{ article.date }}">{{ article.date[:10] }}</time>{% endif %}</div>
+  </header>
+  <div class="reader-layout">
+    <article class="reader-body" aria-label="Extrait de l’article">
+      {% if article.text %}<blockquote class="press-excerpt"><p>{{ article.text }}</p></blockquote>{% else %}<p>Ce flux fournit le titre, mais aucun extrait pour cet article.</p>{% endif %}
+      <p class="reader-credit">{{ source.name }}{% if article.author %} · {{ article.author }}{% endif %}. Extrait du flux RSS du média, conservé au moment de la sélection.</p>
+      <section class="reader-context"><h2>Pour situer cette lecture</h2><p>Vous lisez ici le contenu de présentation partagé par {{ source.name }}. Il peut être plus court que l’article original. La source reste accessible si vous souhaitez approfondir ou vérifier l’information.</p></section>
+    </article>
+    <aside class="reader-source" aria-labelledby="readerSourceTitle">
+      <p class="eyebrow">L’origine de l’info</p><h2 id="readerSourceTitle">{{ source.name }}</h2>
+      <p>Article de presse · {{ category }}</p>
+      <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer">Consulter la source originale ↗</a>
+      <small>Le lien ouvre le site du média dans un nouvel onglet.</small>
+    </aside>
+  </div>
+  {% include "public/reader_suggestions.html" %}
+</div>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/editorial-polish.js') }}"></script>{% endblock %}

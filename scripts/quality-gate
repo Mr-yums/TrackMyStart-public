@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# [Sol] Toute erreur bloque l'image ; aucun secret réseau nécessaire.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+PYTHON="${PYTHON:-python}"
+"$PYTHON" -m pip check
+"$PYTHON" -m pytest -q -p no:cacheprovider -m 'not live'
+# [Sol] Nettoyage du cache temporaire, même si la compilation échoue.
+audit_cache_dir=$(mktemp -d)
+trap 'rm -rf -- "$audit_cache_dir"' EXIT
+PYTHONPYCACHEPREFIX="$audit_cache_dir" "$PYTHON" -m compileall -q yumnews config.py app.py wsgi.py
+"$PYTHON" ops/smoke.py --isolated

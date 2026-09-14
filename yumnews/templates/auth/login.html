@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Connexion</h1>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% if request.args.next %}<input type="hidden" name="next" value="{{ request.args.next }}">{% endif %}
+    <div class="field">{{ form.email.label }}{{ form.email(class_="input", type="email", autocomplete="email") }}</div>
+    <div class="field">{{ form.password.label }}{{ form.password(class_="input", autocomplete="current-password") }}</div>
+    <div class="field"><label class="check">{{ form.remember() }} <span>Se souvenir de moi</span></label></div>
+    <button class="btn btn-primary btn-block" type="submit">Se connecter</button>
+  </form>
+  <p class="muted center"><a href="{{ url_for('auth.forgot_password') }}">Mot de passe oublié ?</a> · <a href="{{ url_for('auth.register') }}">Créer un compte</a></p>
+</div>
+{% endblock %}

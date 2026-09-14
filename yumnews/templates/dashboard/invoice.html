@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Facture {{ invoice.number }}{% endblock %}
+{% block content %}
+{# [Sol] Les anciennes factures conservent leur présentation historique. #}
+{% set issuer = snapshot.issuer if snapshot else none %}
+<div class="invoice">
+  <div class="invoice-head">
+    <div><h1>Facture</h1><p class="muted">N° <strong>{{ invoice.number }}</strong><br>Émise le {{ invoice.issued_at.strftime('%d/%m/%Y') }}</p></div>
+    <div class="right"><strong>{{ issuer.name if issuer else site_name }}</strong><br><span class="muted">{{ issuer.address if issuer and issuer.address else "Service éditorial en ligne" }}</span>{% if issuer and issuer.vat_number %}<br>TVA : {{ issuer.vat_number }}{% endif %}</div>
+  </div>
+  <p><strong>Client :</strong> {{ snapshot.customer_name if snapshot else user.display_name }} — {{ snapshot.customer_email if snapshot else user.email }}</p>
+  <table class="table">
+    <thead><tr><th>Désignation</th><th class="right">HT</th><th class="right">TVA {{ issuer.vat_rate_percent if issuer else 20 }} %</th><th class="right">TTC</th></tr></thead>
+    <tbody><tr><td>{{ invoice.description }}</td><td class="right">{{ '%.2f'|format(invoice.amount_ht_cents/100) }} {{ invoice.currency }}</td><td class="right">{{ '%.2f'|format(invoice.vat_cents/100) }} {{ invoice.currency }}</td><td class="right">{{ '%.2f'|format(invoice.amount_ttc_cents/100) }} {{ invoice.currency }}</td></tr></tbody>
+    <tfoot><tr><th colspan="3" class="right">Total payé</th><th class="right">{{ '%.2f'|format(invoice.amount_ttc_cents/100) }} {{ invoice.currency }}</th></tr></tfoot>
+  </table>
+  <p class="muted small">Paiement {{ invoice.payment.provider }}{% if invoice.payment.card_brand %} · {{ invoice.payment.card_brand }} •••• {{ invoice.payment.card_last4 }}{% endif %}{% if invoice.payment.receipt_url %} · <a href="{{ invoice.payment.receipt_url }}" target="_blank" rel="noopener">reçu</a>{% endif %}</p>
+  <button class="btn btn-ghost no-print" onclick="window.print()">Imprimer / PDF</button>
+</div>
+{% endblock %}

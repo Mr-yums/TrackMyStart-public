@@ -1,0 +1,35 @@
+# [Sol] Services persistants ; les versions de l'application sont isolées.
+name: trackmystart
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: trackmystart
+      POSTGRES_USER: trackmystart
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - database:/var/lib/postgresql
+      - /etc/trackmystart/db_password:/run/secrets/db_password:ro
+    networks: [backend]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U trackmystart -d trackmystart"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - /opt/trackmystart/proxy:/etc/caddy:ro
+      - certificates:/data
+      - caddy_config:/config
+    networks: [backend]
+networks:
+  backend:
+    name: trackmystart_backend
+volumes:
+  database:
+  certificates:
+  caddy_config:

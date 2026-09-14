@@ -1,0 +1,6 @@
+# [Sol] Vérification éditeur uniquement ; aucun script publicitaire.
+handle /ads.txt {
+  root * /etc/caddy/publisher
+  header Content-Type "text/plain; charset=utf-8"
+  file_server
+}

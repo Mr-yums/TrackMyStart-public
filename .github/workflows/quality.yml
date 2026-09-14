@@ -1,0 +1,37 @@
+# [Sol] Activée à l'ajout du projet dans GitHub ; même contrôle que sur le VPS.
+name: Conditions de validation
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_PASSWORD: isolated-ci-only
+          POSTGRES_DB: coupons_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d coupons_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construire l'image
+        run: docker build -t trackmystart:candidate .
+      - name: Tests isolés sans réseau
+        run: docker run --rm --network none trackmystart:candidate bash scripts/quality-gate
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntaxe JavaScript
+        run: for f in yumnews/static/js/*.js; do node --check "$f"; done
+      # [Sol] Les courses critiques et la migration sont aussi testées sur le moteur de production.
+      - name: Migration et concurrence PostgreSQL
+        run: >-
+          docker run --rm --network host
+          -e SOL_TEST_POSTGRES_URL=postgresql+psycopg2://postgres:isolated-ci-only@127.0.0.1:5432/coupons_test
+          trackmystart:candidate python -m pytest -q -p no:cacheprovider
+          tests/test_coupon_migration.py tests/test_coupon_concurrency.py tests/test_recommendation_concurrency.py

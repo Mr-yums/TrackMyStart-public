@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# [Sol] Préparation Ubuntu uniquement ; aucun service existant n'est remplacé.
+set -euo pipefail
+[[ $EUID == 0 ]]
+. /etc/os-release
+[[ "$ID" == ubuntu ]] || { echo 'Vérifier la procédure pour cet OS avant installation'; exit 1; }
+if ! command -v docker >/dev/null || ! docker compose version >/dev/null 2>&1; then
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io docker-compose-v2
+fi
+systemctl enable --now docker
+install -d -m 700 /etc/trackmystart /opt/trackmystart/backups
+install -d -m 755 /opt/trackmystart/proxy /opt/trackmystart/releases

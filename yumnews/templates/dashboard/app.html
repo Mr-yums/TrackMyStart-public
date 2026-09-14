@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block body_class %}dash{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/editorial-polish.css') }}">{% endblock %}
+{% block main_class %}dash-main{% endblock %}
+{% block content %}
+{% if not tmdb_ready %}<div class="flash flash-error">Clé TMDB absente : le catalogue films/séries est désactivé (variable TMDB_API_KEY).</div>{% endif %}
+<div class="dash-bar">
+  <ul class="tabs" id="tabs" role="tablist">
+    <li class="tab active" data-tab="home">Accueil</li>
+    <li class="tab" data-tab="movies">Films</li>
+    <li class="tab" data-tab="series">Séries</li>
+    <li class="tab" data-tab="mangas">Mangas</li>
+    <li class="tab" data-tab="people">Acteurs</li>
+    <li class="tab" data-tab="news">Presse</li>
+    <li class="tab tab-premium" data-tab="upcoming">Prochainement</li>
+    <li class="tab" data-tab="me">Mon espace</li>
+  </ul>
+  <div class="search-wrap">
+    <input id="searchInput" class="search-input" type="search" placeholder="Rechercher un film, une série, un acteur, un manga…" autocomplete="off">
+  </div>
+</div>
+
+<div class="search-overlay" id="searchOverlay" hidden>
+  <div class="search-panel">
+    <div class="search-head"><span id="searchTitle">Résultats</span><button class="icon-btn" id="searchClose" aria-label="Fermer">✕</button></div>
+    <div class="grid grid-sm" id="searchGrid"></div>
+    <div class="grid grid-sm" id="searchMangaGrid"></div>
+  </div>
+</div>
+
+<section class="panel active" id="tab-home">
+  <div class="hero" id="hero"><div class="hero-slides" id="heroSlides"></div><div class="hero-dots" id="heroDots"></div></div>
+  {# [Sol] Ajout ciblé ; l'espace personnel reste intact. #}
+  <section class="section" id="recommendationsSection" aria-labelledby="recommendationsTitle">
+    <div class="section-header"><h2 class="section-title" id="recommendationsTitle">Pour vous · vos stars et leurs projets</h2>
+      <label>Ordre <select class="select" data-rec-mode><option value="personal">Pour vous</option><option value="chronological">Par date</option></select></label>
+      <button type="button" class="link-btn" data-rec-refresh>Actualiser</button>
+    </div>
+    <p class="muted" data-rec-hint aria-live="polite"></p><p class="muted small" data-rec-lock></p>
+    <p class="muted small" data-rec-status role="status"></p>
+    <div class="recommendation-grid" data-rec-grid></div>
+    <details class="recommendation-settings"><summary><span class="rec-settings-icon" aria-hidden="true">✦</span><span><strong>Comprendre et régler mon fil</strong><small>Vos goûts, vos choix. Un fil qui vous ressemble.</small></span><span class="rec-settings-chevron" aria-hidden="true">⌄</span></summary><div class="rec-settings-content" data-rec-settings><p class="rec-settings-loading" role="status">Chargement de vos réglages…</p></div></details>
+  </section>
+  {% if not policy.can("ad_free") %}<aside class="sponsor-slot" data-ad-placement="home" aria-label="Publicité" hidden></aside>{% endif %}
+  <div class="section" id="feedSection" hidden>
+    <div class="section-header"><h2 class="section-title">🎭 Vos acteurs · à venir</h2><span class="muted small" id="feedHint"></span></div>
+    <div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel" id="carouselFeed"></div><button class="carousel-btn next">›</button></div>
+  </div>
+  <div class="section"><div class="section-header"><h2 class="section-title">🔥 Films tendance</h2></div><div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel" id="carouselMovies"></div><button class="carousel-btn next">›</button></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">🎬 À l'affiche</h2></div><div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel" id="carouselNowPlaying"></div><button class="carousel-btn next">›</button></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">📺 Séries tendance</h2></div><div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel carousel-lg" id="carouselSeries"></div><button class="carousel-btn next">›</button></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">📚 Mangas · nouveautés</h2></div><div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel" id="carouselMangas"></div><button class="carousel-btn next">›</button></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">⭐ Acteurs en vue</h2></div><div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel" id="carouselPeople"></div><button class="carousel-btn next">›</button></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">📰 À la une</h2><button class="link-btn" data-goto="news">Toute la presse →</button></div><div class="news-grid" id="homeNews"></div></div>
+</section>
+
+<section class="panel" id="tab-movies">
+  <div class="filter-bar"><div class="pills" id="moviePills"></div><button class="sort-btn" id="movieSort" title="Trier par note">⭐</button></div>
+  <div data-catalog-filters="movie"></div>
+  <div class="grid" id="movieGrid"></div>
+  {% if not policy.can("ad_free") %}<aside class="sponsor-slot" data-ad-placement="catalog" aria-label="Publicité" hidden></aside>{% endif %}
+</section>
+
+<section class="panel" id="tab-series">
+  <div class="filter-bar"><div class="pills" id="platformPills"></div></div>
+  <div class="filter-bar"><div class="pills" id="seriesPills"></div><button class="sort-btn" id="seriesSort" title="Trier par note">⭐</button></div>
+  <div data-catalog-filters="tv"></div>
+  <div class="grid grid-lg" id="seriesGrid"></div>
+  {% if not policy.can("ad_free") %}<aside class="sponsor-slot" data-ad-placement="catalog" aria-label="Publicité" hidden></aside>{% endif %}
+</section>
+
+<section class="panel" id="tab-mangas">
+  <div class="filter-bar"><div class="pills" id="mangaPills"></div>
+    <select class="select" id="mangaSort"><option value="popular">Populaires</option><option value="rating">Mieux notés</option><option value="updated">Mis à jour</option><option value="new">Nouveaux</option></select>
+  </div>
+  <div class="grid" id="mangaGrid"></div>
+  <div class="center"><button class="btn btn-ghost" id="mangaMore" hidden>Charger plus</button></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">📅 Anime · épisodes de la semaine</h2><span class="muted small" id="animeHint"></span></div><div class="anime-list" id="animeSchedule"></div></div>
+</section>
+
+<section class="panel" id="tab-people">
+  <div class="filter-bar"><input class="input input-inline" id="peopleFilter" placeholder="Filtrer par nom…"></div>
+  <div class="grid grid-people" id="peopleGrid"></div>
+  <div class="center"><button class="btn btn-ghost" id="peopleMore">Charger plus</button></div>
+</section>
+
+<section class="panel" id="tab-news">
+  <div class="filter-bar"><div class="pills" id="newsCatPills"></div></div>
+  <div class="filter-bar"><div class="pills pills-sm" id="newsSourcePills"></div></div>
+  <div class="news-grid" id="newsGrid"></div>
+</section>
+
+<section class="panel" id="tab-upcoming">
+  <div class="filter-bar"><div class="pills" id="upcomingPills"><span class="pill active" data-kind="all">Tout</span><span class="pill" data-kind="movie">Films</span><span class="pill" data-kind="tv">Séries</span></div></div>
+  <div class="grid" id="upcomingGrid"></div>
+</section>
+
+<section class="panel" id="tab-me">
+  <div class="me-head" id="meHead"></div>
+  <div class="member-links"><a class="btn btn-ghost" href="{{ url_for('dashboard.account') }}">Compte, abonnement et factures</a><a class="btn btn-ghost" href="#preferencesForm" id="preferencesShortcut">Mes préférences</a></div>
+  {% include "dashboard/preferences.html" %}
+  <div data-title-history></div>
+  {% if current_user.is_admin %}<a class="btn btn-ghost" href="{{ url_for('advertising.admin') }}">Gérer les publicités</a>{% endif %}
+  <div class="section"><div class="section-header"><h2 class="section-title">🎭 Acteurs suivis</h2><span class="muted small" id="followsHint"></span></div><div class="grid grid-people" id="followsGrid"></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">🆕 Sorties récentes de vos acteurs</h2></div><div class="carousel-wrap"><button class="carousel-btn prev">‹</button><div class="carousel" id="carouselFeedRecent"></div><button class="carousel-btn next">›</button></div></div>
+  <div class="section"><div class="section-header"><h2 class="section-title">📌 Ma liste</h2><span class="muted small" id="watchlistHint"></span></div><div class="grid" id="watchlistGrid"></div></div>
+</section>
+
+<aside class="detail" id="detail" aria-hidden="true"><button class="detail-close" id="detailClose" aria-label="Fermer">✕</button><div class="detail-inner" id="detailInner"></div></aside>
+<div class="toasts" id="toasts"></div>
+{% endblock %}
+{% block scripts %}
+<script>window.TRACKMYSTART = {{ {"policy": policy.to_dict(), "checkoutUrl": url_for('billing.checkout') if payments_enabled else url_for('public.preregistration'), "paymentsEnabled": payments_enabled, "price": offer.price_label}|tojson }};</script>
+<script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

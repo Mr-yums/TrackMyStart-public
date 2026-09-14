@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Tarifs{% endblock %}
+{% block content %}
+<h1 class="page-title">Un accès gratuit, un accès Premium.</h1>
+<p class="lead center">Trouvez votre prochaine découverte plus facilement : affinez vos recherches et gardez un espace à votre image.</p>
+<div class="pricing-grid">
+  <div class="plan">
+    <h2>Découverte</h2>
+    <p class="price">0 €</p>
+    <ul>
+      <li>Films, séries et mangas du moment</li>
+      <li>Presse cinéma & séries (3 sources par rubrique)</li>
+      <li>3 acteurs suivis, liste de 10 titres</li>
+      <li>Fiche détaillée + bande-annonce</li>
+      <li>Marquer les titres vus et « Pas intéressé »</li>
+      <li>Publicités limitées lorsqu’une campagne est disponible</li>
+    </ul>
+    <a class="btn btn-ghost" href="{{ url_for('auth.register') }}">Créer un compte</a>
+  </div>
+  <div class="plan plan-premium">
+    <span class="badge badge-gold">Recommandé</span>
+    <h2>Premium</h2>
+    <p class="price">{{ offer.price_label }}<span>/ {{ offer.period_days }} jours</span></p>
+    <ul>
+      <li>Tous les avantages Découverte, suivis et liste sans limite</li>
+      <li>Sans publicité sur TrackMyStart pendant votre abonnement</li>
+      <li>Filtres mémorisés : pays de production, durée et votes TMDB</li>
+      <li>Masquage automatique des titres vus et non aimés dans le catalogue</li>
+      <li>Toute la presse : anime, streaming, industrie</li>
+      <li>Fil d'actualité complet de vos acteurs suivis</li>
+      <li>Rubrique « Prochainement » films & séries</li>
+      <li>Détail des saisons et épisodes</li>
+      <li>Planning anime de la semaine complet</li>
+      <li>Catalogue étendu (5 pages par liste)</li>
+    </ul>
+    <a class="btn btn-primary" href="{{ url_for('billing.checkout') if current_user.is_authenticated else url_for('auth.register') }}">Passer Premium</a>
+    <p class="muted small">Sans engagement : chaque paiement ouvre {{ offer.period_days }} jours. Carte bancaire{% if payment_methods|length > 1 %} ou crypto{% endif %}.</p>
+  </div>
+</div>
+{% endblock %}

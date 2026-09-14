@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body_class %}editorial-ui{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/editorial-polish.css') }}">{% endblock %}
+{% block title %}Les brèves : projets, castings et rendez-vous{% endblock %}
+{% block main_class %}reader-page{% endblock %}
+{% block content %}
+<div class="reader-wrap">
+  <a class="reader-back" href="{{ url_for('public.home') }}">← Retour à l’accueil</a>
+  <header class="reader-header">
+    <p class="eyebrow">Le fil TrackMyStart</p>
+    <h1>L’actualité se lit ici.</h1>
+    <p class="reader-lead">Une sélection de brèves pour comprendre ce qui se prépare, retrouver les faits et consulter leurs sources.</p>
+  </header>
+  <div class="reader-index">
+    {% for story in stories %}
+    <article data-story-theme="{{ story.theme }}">
+      <p class="eyebrow">{{ story.category }}</p>
+      <h2><a href="{{ url_for('public.news_article', slug=story.slug) }}">{{ story.title }}</a></h2>
+      <p>{{ story.lead }}</p>
+      <div class="reader-meta"><span class="reader-status">{{ story.status }}</span><span>Source : {{ story.source_name }}</span></div>
+      <a class="landing-text-link" href="{{ url_for('public.news_article', slug=story.slug) }}">Lire la brève →</a>
+    </article>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/editorial-polish.js') }}"></script>{% endblock %}

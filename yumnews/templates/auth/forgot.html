@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Mot de passe oublié{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <h1>Mot de passe oublié</h1>
+  <p class="muted">Indiquez votre email, nous vous envoyons un lien valable 1 h.</p>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.email.label }}{{ form.email(class_="input", type="email", autocomplete="email") }}</div>
+    <button class="btn btn-primary btn-block" type="submit">Envoyer le lien</button>
+  </form>
+  <p class="muted">Toujours bloqué ? <a href="{{ url_for('public.support') }}">Contacter l’assistance</a>.</p>
+</div>
+{% endblock %}

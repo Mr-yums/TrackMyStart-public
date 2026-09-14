@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <script>
+    // [Sol] Une transition native annulée (retour/redimensionnement) garde la navigation normale.
+    for (const eventName of ['pageswap', 'pagereveal']) {
+      window.addEventListener(eventName, event => {
+        const transition = event.viewTransition;
+        if (!transition) return;
+        for (const promise of [transition.ready, transition.finished, transition.updateCallbackDone]) {
+          promise.catch(error => {
+            if (error.name !== 'AbortError') queueMicrotask(() => { throw error; });
+          });
+        }
+      });
+    }
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ site_name }}{% endblock %} · {{ site_name }}</title>
+  <meta name="description" content="{{ site_name }} : l'actualité des films, séries et mangas du moment. Suivez vos acteurs, trouvez où regarder légalement.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/trackmystart.css') }}">
+  {% block head %}{% endblock %}
+  {# [Sol] Google gère la CMP ; aucun choix de consentement simulé côté site. #}
+  {% if adsense_client %}
+  <script async crossorigin="anonymous" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client }}"></script>
+  {% endif %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<nav class="nav">
+  <a class="nav-logo" href="{{ url_for('public.home') }}" aria-label="{{ site_name }}">
+    <span class="logo-mark">T</span><span class="logo-text">{{ site_name }}</span>
+  </a>
+  <div class="nav-links">
+    {# [Sol] Garder les accès à l'accueil et au dashboard visibles après déconnexion. #}
+    <a href="{{ url_for('public.home') }}" class="{% if request.endpoint == 'public.home' %}active{% endif %}">Accueil</a>
+    <a href="{{ url_for('dashboard.app') }}" class="{% if request.endpoint == 'dashboard.app' %}active{% endif %}">Dashboard</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard.account') }}" class="{% if request.endpoint == 'dashboard.account' %}active{% endif %}">Compte</a>
+      {% if policy.plan.value != 'premium' %}<a href="{{ url_for('billing.checkout') }}" class="nav-cta">{{ "Premium · " ~ offer.price_label ~ "/mois" if payments_enabled else "Préinscription Premium" }}</a>{% else %}<span class="badge badge-gold">Premium</span>{% endif %}
+      <form method="post" action="{{ url_for('auth.logout') }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-btn" type="submit">Déconnexion</button></form>
+    {% else %}
+      <a href="{{ url_for('public.pricing') }}">Tarifs</a>
+      <a href="{{ url_for('auth.login') }}">Connexion</a>
+      <a href="{{ url_for('auth.register') }}" class="nav-cta">Créer un compte</a>
+    {% endif %}
+  </div>
+</nav>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flashes">
+    {% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+<main class="{% block main_class %}container{% endblock %}">
+{% block content %}{% endblock %}
+</main>
+<footer class="footer">
+  <span>© {{ site_name }} — données <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>, <a href="https://mangadex.org" rel="noopener" target="_blank">MangaDex</a>, <a href="https://anilist.co" rel="noopener" target="_blank">AniList</a> et flux RSS des médias cités.</span>
+  <span><a href="{{ url_for('public.pricing') }}">Tarifs</a> · <a href="{{ url_for('public.legal') }}">Mentions légales</a> · <a href="{{ url_for('public.privacy') }}">Confidentialité</a> · <a href="{{ url_for('public.support') }}">Aide et contact</a></span>
+</footer>
+{% if adsense_client %}
+<div class="container"><button type="button" class="link-btn" id="google-consent-settings" hidden>Confidentialité et cookies publicitaires</button></div>
+<script type="module" src="{{ url_for('static', filename='js/google-consent.js') }}"></script>
+{% endif %}
+<script type="module" src="{{ url_for('static', filename='js/advertising.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

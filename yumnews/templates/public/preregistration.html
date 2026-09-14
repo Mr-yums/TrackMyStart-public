@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{# [Sol] Aucune carte, aucun prix prélevé, aucun SDK de paiement. #}
+{% block title %}Préinscription Premium{% endblock %}
+{% block content %}
+<div class="auth-card" style="max-width:640px">
+  <span class="badge badge-gold">Bientôt disponible</span>
+  <h1>Le prochain chapitre de TrackMyStart.</h1>
+  <p>Nous préparons l’ouverture de Premium et finalisons le système de paiement. En attendant, rejoignez gratuitement la liste de préinscription.</p>
+  <p><strong>Aucune carte demandée. Aucun prélèvement. Aucun engagement.</strong> L’offre Découverte reste accessible gratuitement. La préinscription n’active pas Premium.</p>
+  {% if current_user.is_authenticated %}
+    {% if preregistration.active %}
+      <h2>Vous êtes sur la liste.</h2>
+      <p>Nous pourrons vous prévenir à l’adresse de votre compte lorsque Premium ouvrira. Vous déciderez alors librement de vous abonner.</p>
+      <form method="post" action="{{ url_for('public.preregistration') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="leave"><button class="btn btn-ghost" type="submit">Quitter la liste</button></form>
+    {% else %}
+      <form method="post" action="{{ url_for('public.preregistration') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="join">
+        <label style="display:flex;gap:12px;align-items:flex-start;margin:24px 0;line-height:1.6"><input style="margin-top:6px" type="checkbox" name="consent" value="yes" required>Me prévenir par e-mail lorsque les inscriptions Premium ouvriront.</label>
+        <button class="btn btn-primary btn-block" type="submit">Me préinscrire gratuitement</button>
+      </form>
+    {% endif %}
+    <p><a href="{{ url_for('dashboard.app') }}">Continuer à découvrir le site</a></p>
+  {% else %}
+    <p>Créez votre compte gratuit, puis confirmez votre préinscription. Si vous avez déjà un compte, connectez-vous.</p>
+    <p><a class="btn btn-primary btn-block" href="{{ url_for('auth.register', next=url_for('public.preregistration')) }}">Créer mon compte gratuit</a></p>
+    <p><a href="{{ url_for('auth.login', next=url_for('public.preregistration')) }}">J’ai déjà un compte</a></p>
+  {% endif %}
+  <p class="muted small">Votre choix est enregistré dans votre compte et peut être retiré ici à tout moment. Il concerne le message d’ouverture de Premium, sans inscription à une newsletter. <a href="{{ url_for('public.privacy') }}">Confidentialité</a></p>
+</div>
+{% endblock %}

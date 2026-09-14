@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block body_class %}editorial-ui{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/editorial-polish.css') }}">{% endblock %}
+{% block title %}Films, séries et mangas du moment{% endblock %}
+{% block main_class %}landing{% endblock %}
+{% block content %}
+<section class="landing-hero">
+  {# [Sol] Les images se superposent au fond existant sans remplacer son thème. #}
+  <div class="landing-backdrops" id="landingBackdrops" aria-hidden="true"></div>
+  <div class="landing-shade" aria-hidden="true"></div>
+  <div class="landing-hero-inner">
+    <p class="eyebrow">Actualité ciné · séries · mangas</p>
+    <h1>Tout ce qui sort, <span class="accent">au même endroit.</span></h1>
+    <p class="lead">Les films à l'affiche, les séries qui cartonnent, les mangas du moment et la presse spécialisée, mis à jour en continu. Suivez vos acteurs, gardez une liste, et sachez en un clic <strong>où regarder légalement</strong> : Netflix, Prime Video, Disney+, Canal+, Crunchyroll…</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Créer un compte gratuit</a>
+      <a class="btn btn-ghost" href="{{ url_for('public.pricing') }}">{{ "Voir l’offre Premium · " ~ offer.price_label ~ "/mois" if payments_enabled else "Me préinscrire à Premium" }}</a>
+    </div>
+    <div class="landing-visual-caption" id="landingVisualCaption" hidden>
+      <div><span id="landingVisualLabel"></span><a id="landingVisualTitle" target="_blank" rel="noopener noreferrer"></a><small>Visuel TMDB · disponibilité France</small></div>
+      <div class="landing-visual-controls">
+        <button type="button" id="landingVisualNext" aria-label="Image suivante">Suivante <span aria-hidden="true">→</span></button>
+        <button type="button" id="landingVisualPause" aria-pressed="false">Pause</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="landing-story" aria-labelledby="landingStoryTitle">
+  <div>
+    <p class="eyebrow">De la découverte au prochain rendez-vous</p>
+    <h2 id="landingStoryTitle">Un film vous intrigue.<br>Une histoire commence.</h2>
+  </div>
+  <div class="landing-story-copy">
+    <p>Un visage aperçu dans une série, un réalisateur dont vous attendez le prochain film, un manga qu’on vous a conseillé… TrackMyStart vous aide à retrouver le fil.</p>
+    <p>Explorez les titres, gardez ceux qui vous tentent et suivez les talents qui vous intéressent. Votre espace rassemble leurs projets, vos envies et les articles de la presse spécialisée, pour revenir à l’essentiel : <strong>ce que vous avez vraiment envie de voir.</strong></p>
+    <a class="landing-text-link" href="{{ url_for('dashboard.app') }}">Découvrir mon espace <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
+<section class="section">
+  <div class="section-header"><h2 class="section-title">Tendances de la semaine</h2></div>
+  <div class="carousel-wrap"><div class="carousel" id="landingTrending"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>
+</section>
+<section class="features">
+  <article><h3>📰 La presse, triée</h3><p>AlloCiné, Première, Variety, Anime News Network, Manga-news… regroupés par thème, sans pub ni bruit.</p></article>
+  <article><h3>🎭 Vos acteurs, suivis</h3><p>Un fil personnalisé : les prochaines sorties et les nouveautés des acteurs et réalisateurs que vous suivez.</p></article>
+  <article><h3>📺 Où regarder ?</h3><p>Pour chaque titre, les plateformes officielles disponibles en France avec un lien direct.</p></article>
+  <article><h3>📚 Mangas & anime</h3><p>Les mangas populaires, les nouveautés, et le planning des épisodes anime de la semaine.</p></article>
+</section>
+<section class="landing-editorial" aria-labelledby="landingEditorialTitle">
+  <div class="landing-editorial-heading">
+    <p class="eyebrow">À lire sur TrackMyStart</p>
+    <h2 id="landingEditorialTitle">Ce qui se prépare.<br>Et ce qu’il faut en retenir.</h2>
+    <p>Projets, castings et rendez-vous : prenez le temps de comprendre l’actualité ici. Chaque brève vous donne l’essentiel, le contexte et l’origine de l’information.</p>
+    <a class="landing-text-link" href="{{ url_for('public.news_index') }}">Toutes les brèves <span aria-hidden="true">→</span></a>
+  </div>
+  <div class="landing-source-list">
+    {% for story in stories %}
+    <a data-story-theme="{{ story.theme }}" href="{{ url_for('public.news_article', slug=story.slug) }}">
+      <span class="source-number">{{ '%02d'|format(loop.index) }}</span>
+      <span><small>{{ story.category }} · {{ story.status }}</small><strong>{{ story.title }}</strong><span>{{ story.lead }}</span><span class="brief-origin">Source : {{ story.source_name }} · Lire ici</span></span>
+      <b aria-hidden="true">→</b>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/landing.js') }}"></script>{% endblock %}

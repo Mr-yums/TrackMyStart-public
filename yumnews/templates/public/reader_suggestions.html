@@ -1,0 +1,11 @@
+{# [Sol] Catalogue vivant chargé à part ; la lecture reste disponible sans attendre les flux. #}
+<section class="reader-discovery" data-reader-suggestions data-context='{{ reader_context|tojson|forceescape }}' aria-labelledby="readerDiscoveryTitle">
+  <div class="reader-discovery-head"><div><p class="eyebrow">La lecture continue</p><h2 id="readerDiscoveryTitle">D’autres histoires pour vous</h2><p class="muted">Vos suivis, vos choix et de nouvelles pistes à découvrir.</p></div><div class="reader-discovery-arrows"><span class="reader-discovery-position" data-reader-position aria-live="polite"></span><button type="button" data-reader-prev aria-label="Articles précédents" disabled>←</button><button type="button" data-reader-next aria-label="Articles suivants" disabled>→</button></div></div>
+  <p class="reader-discovery-status" data-reader-status role="status">Recherche d’articles dans vos sources…</p>
+  <div class="reader-discovery-track" data-reader-track role="region" aria-label="Autres articles à lire" tabindex="0"></div>
+  <div class="reader-discovery-bottom"><button type="button" class="btn btn-ghost btn-sm" data-reader-more disabled>Voir d’autres articles</button><button type="button" class="link-btn" data-reader-refresh>Actualiser la sélection</button></div>
+  <noscript><p>Activez JavaScript pour parcourir les articles des flux. <a href="{{ url_for('dashboard.app') }}#news">Ouvrir la presse</a>.</p></noscript>
+</section>
+
+{# [Sol] Publicité hors de la lecture et hors des pages du carrousel. #}
+{% if not policy.can('ad_free') %}<aside class="sponsor-slot" data-ad-placement="reader" aria-label="Publicité" hidden></aside>{% endif %}

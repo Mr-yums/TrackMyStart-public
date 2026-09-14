@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Mon compte{% endblock %}
+{% block content %}
+<h1 class="page-title">Mon compte</h1>
+<p><a class="btn btn-ghost" href="{{ url_for('dashboard.app') }}#me">Mon espace et mes préférences</a></p>
+<div class="account-grid">
+  <section class="card-panel">
+    <h2>Abonnement</h2>
+    {% if not payments_enabled %}
+      <p>L’ouverture des paiements Premium est en préparation. La préinscription est gratuite et sans engagement.</p>
+      {% if subscription.active %}<p>Votre accès actuel reste actif jusqu’au {{ subscription.period_end[:10] }}.</p>{% endif %}
+      <a class="btn btn-primary" href="{{ url_for('public.preregistration') }}">Ma préinscription Premium</a>
+    {% elif subscription.active %}
+      <p><span class="badge badge-gold">Premium</span> actif jusqu'au <strong>{{ subscription.period_end[:10] }}</strong> ({{ subscription.days_left }} jours restants).</p>
+      <a class="btn btn-ghost" href="{{ url_for('billing.checkout') }}">Prolonger de {{ offer.period_days }} jours</a>
+    {% else %}
+      <p>Plan <strong>Découverte</strong> (gratuit). Passez Premium pour tout débloquer.</p>
+      <a class="btn btn-primary" href="{{ url_for('billing.checkout') }}">Passer Premium · {{ offer.price_label }}</a>
+    {% endif %}
+  </section>
+  {% if discord_seed %}
+  <section class="card-panel">
+    <h2>Accès Discord premium</h2>
+    <p class="muted small">Votre identifiant premium unique. Copiez-le et collez-le au bot Discord pour lier votre compte (valable une fois).</p>
+    <div class="coupon-row">
+      <input type="text" id="discordSeed" value="{{ discord_seed }}" readonly onclick="this.select()" aria-label="Identifiant premium Discord">
+      <button class="btn btn-ghost" type="button" id="copySeed">Copier</button>
+    </div>
+  </section>
+  {% endif %}
+  <section class="card-panel">
+    <h2>Profil</h2>
+    <p><strong>{{ current_user.display_name }}</strong><br>{{ current_user.email }}
+      {% if current_user.entity.email_verified %}<span class="badge badge-ok">vérifié</span>{% else %}<span class="badge">non vérifié</span>
+      <form method="post" action="{{ url_for('auth.resend_verification') }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="link-btn" type="submit">renvoyer l'email</button></form>{% endif %}
+    </p>
+    <details><summary>Changer le mot de passe</summary>
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="field">{{ form.current.label }}{{ form.current(class_="input", autocomplete="current-password") }}</div>
+        <div class="field">{{ form.password.label }}{{ form.password(class_="input", autocomplete="new-password") }}{% for e in form.password.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+        <div class="field">{{ form.confirm.label }}{{ form.confirm(class_="input", autocomplete="new-password") }}{% for e in form.confirm.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+        <button class="btn btn-ghost" type="submit">Enregistrer</button>
+      </form>
+    </details>
+  </section>
+  <section class="card-panel">
+    <h2>Factures</h2>
+    {% if invoices %}
+    <table class="table">
+      <thead><tr><th>N°</th><th>Date</th><th>Montant</th><th></th></tr></thead>
+      <tbody>{% for inv in invoices %}<tr><td>{{ inv.number }}</td><td>{{ inv.issued_at.strftime('%d/%m/%Y') }}</td><td>{{ '%.2f'|format(inv.amount_ttc_cents/100) }} €</td><td><a href="{{ url_for('dashboard.invoice', number=inv.number) }}">voir</a></td></tr>{% endfor %}</tbody>
+    </table>
+    {% else %}<p class="muted">Aucune facture pour le moment.</p>{% endif %}
+    {% if payments %}
+    <details><summary>Historique des paiements</summary>
+      <table class="table"><tbody>{% for p in payments %}<tr><td>{{ p.created_at.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ p.provider }}</td><td>{{ p.status }}</td><td>{{ '%.2f'|format(p.amount_cents/100) }} {{ p.currency }}</td></tr>{% endfor %}</tbody></table>
+    </details>
+    {% endif %}
+  </section>
+  <section class="card-panel">
+    <h2>Mes suivis</h2>
+    <p class="muted small">{{ follows|length }} acteur(s) suivi(s){% if policy.limits.max_follows < 1000000 %} sur {{ policy.limits.max_follows }}{% endif %} · {{ watchlist|length }} titre(s) dans ma liste{% if policy.limits.max_watchlist < 1000000 %} sur {{ policy.limits.max_watchlist }}{% endif %}</p>
+    <div class="chips">{% for f in follows %}<span class="chip">{{ f.name }}</span>{% endfor %}</div>
+    <div class="chips">{% for w in watchlist %}<span class="chip chip-alt">{{ w.title }}{% if w.year %} ({{ w.year }}){% endif %}</span>{% endfor %}</div>
+    <a class="btn btn-ghost" href="{{ url_for('dashboard.app') }}#me">Gérer dans le dashboard</a>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}{% if discord_seed %}
+<script>
+  document.getElementById('copySeed')?.addEventListener('click', async () => {
+    const input = document.getElementById('discordSeed');
+    const btn = document.getElementById('copySeed');
+    try { await navigator.clipboard.writeText(input.value); }
+    catch (e) { input.select(); document.execCommand('copy'); }
+    btn.textContent = 'Copié ✓';
+    setTimeout(() => { btn.textContent = 'Copier'; }, 2000);
+  });
+</script>
+{% endif %}{% endblock %}

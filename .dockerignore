@@ -1,0 +1,16 @@
+# [Sol] L'image ne contient ni historique, ni données, ni notes locales.
+.git
+.venv
+.env*
+instance
+*.log
+__pycache__
+.pytest_cache
+*.pyc
+*.sqlite*
+*.db
+*.dump
+*.md
+docs
+backups
+dist

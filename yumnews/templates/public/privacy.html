@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{# [Sol] Informations sur les traitements effectivement présents dans le service. #}
+{% block title %}Confidentialité et cookies{% endblock %}
+{% block content %}
+<h1 class="page-title">Confidentialité et cookies</h1>
+<div class="prose">
+  <p>Dernière mise à jour : 11 septembre 2026. Cette page concerne TrackMyStart, accessible sur trackmystart.de. Pour une question sur vos données : <a href="mailto:contact@trackmystart.de">contact@trackmystart.de</a>.</p>
+  <h2>Votre compte et vos choix</h2>
+  <p>Nous utilisons votre adresse e-mail, votre nom d’affichage et un mot de passe stocké sous forme d’empreinte pour gérer votre compte. Vos acteurs suivis, votre liste de contenus et vos préférences permettent de vous fournir les fonctionnalités que vous demandez. Les informations d’abonnement et les références de paiement servent au suivi du service et de la facturation.</p>
+  <p>Le fonctionnement du compte repose sur l’exécution du service demandé. La sécurité du site et la prévention des abus relèvent de notre intérêt légitime. Les obligations de facturation peuvent nécessiter la conservation de certaines informations même après la fermeture d’un compte.</p>
+  <h2>Préinscription Premium</h2>
+  <p>Si vous choisissez de vous préinscrire, nous conservons ce choix et sa date dans les préférences de votre compte. Votre accord concerne un message annonçant l’ouverture de Premium. Vous pouvez le retirer à tout moment sur la <a href="{{ url_for('public.preregistration') }}">page de préinscription</a>. Aucune carte bancaire, aucun paiement ni abonnement ne sont créés par cette démarche.</p>
+  <h2>Cookies nécessaires</h2>
+  <p>Un cookie de session permet de rester connecté et de protéger les formulaires. Ces fonctions sont nécessaires au fonctionnement du site. Les supprimer dans votre navigateur peut vous déconnecter. Le choix de consentement publicitaire est conservé par le système Google pour respecter vos préférences.</p>
+  <h2>Publicité et choix de consentement</h2>
+  <p>TrackMyStart utilise Google AdSense pour proposer de la publicité sur les pages de contenu de l’offre gratuite, lorsque Google autorise sa diffusion. Le script publicitaire n’est pas chargé pour les comptes Premium ni sur les pages de compte ou de paiement.</p>
+  <p>Dans les régions concernées, la fenêtre Google propose <strong>Refuser</strong>, <strong>Autoriser</strong> et <strong>Gérer les options</strong>. Les cookies et usages de données soumis au consentement dépendent de votre choix. Le refus de la personnalisation ne vous empêche pas de consulter le contenu ; des annonces limitées peuvent rester possibles selon les règles de Google.</p>
+  <p>Google et les partenaires affichés dans cette fenêtre peuvent traiter des informations telles que l’adresse IP, des identifiants de navigateur et les interactions publicitaires. Les finalités, les partenaires et leurs durées de conservation sont consultables dans « Gérer les options ». Vous pouvez revenir sur votre choix depuis le bouton « Confidentialité et cookies publicitaires » en bas d’une page de contenu où le service Google est disponible.</p>
+  <p>En savoir plus : <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">utilisation des données par Google sur les sites partenaires</a> et <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité Google</a>.</p>
+  <h2>Prestataires et contenus externes</h2>
+  <p>Le site est hébergé chez Hetzner. Les courriers adressés au contact du site transitent par ImprovMX vers notre messagerie Microsoft ; les envois de l’équipe utilisent Brevo. Les échanges servent à traiter votre demande : écrire au support ne vous inscrit pas à une newsletter.</p>
+  <p>Les paiements sont pris en charge par les prestataires indiqués lors du paiement. Les numéros de carte ne sont pas stockés par TrackMyStart. Les images de catalogue et polices peuvent être chargées depuis des services externes, notamment TMDB et Google Fonts : votre navigateur leur communique les informations réseau nécessaires au chargement. Les sites sources accessibles par lien appliquent leurs propres politiques.</p>
+  <p>Certains prestataires peuvent traiter des données hors de l’Espace économique européen. Leurs politiques précisent les lieux de traitement et les garanties qu’ils appliquent.</p>
+  <h2>Conservation et droits</h2>
+  <p>Les données de compte sont conservées pour fournir le service tant que le compte est actif. Pour fermer votre compte ou demander la suppression de vos données, écrivez à <a href="mailto:suppression@trackmystart.de">suppression@trackmystart.de</a>. Les pièces soumises à une obligation légale de conservation peuvent être conservées séparément ; nous vous préciserons ce qui s’applique à votre demande.</p>
+  <p>Vous pouvez demander l’accès, la rectification, l’effacement, la limitation ou la portabilité de vos données, et vous opposer aux traitements fondés sur l’intérêt légitime. Le retrait de votre consentement vaut pour les traitements futurs. Vous pouvez également saisir l’autorité de protection des données compétente, notamment la <a href="https://www.cnil.fr/fr/adresser-une-plainte" target="_blank" rel="noopener">CNIL</a> en France.</p>
+</div>
+{% endblock %}

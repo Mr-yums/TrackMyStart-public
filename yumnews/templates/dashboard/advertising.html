@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Publicité · administration{% endblock %}
+{% block content %}
+{# [Sol] Une campagne directe à la fois ; aucune régie connectée par défaut. #}
+<h1 class="page-title">Publicité · administration</h1>
+<p class="lead">Une campagne choisie, des emplacements limités. Les abonnés Premium ne reçoivent aucune annonce.</p>
+<p>Pour les campagnes rémunérées par une régie : <a href="https://adsense.google.com/start/" target="_blank" rel="noopener noreferrer">créer un compte AdSense ↗</a>. Cette page gère les campagnes directes ; enregistrer une annonce ne crée pas de revenus automatiquement.</p>
+<form id="advertisingForm" class="catalog-comfort" style="padding:24px" hidden>
+  <div class="comfort-checks"><label><input type="checkbox" name="enabled"> Diffuser cette campagne</label><label><input type="checkbox" name="interstitial"> Autoriser la coupure entre fiches acteurs</label></div>
+  <p class="muted small">Coupure facultative après 6 fiches acteurs refermées, au plus 2 fois par session et à 10 minutes d’intervalle. Fermeture immédiate possible ; reprise automatique après 5 secondes. Aucun script Google n’est inséré ici.</p>
+  <div class="comfort-fields">
+    <label>Titre<input class="input" name="title" maxlength="150" required></label>
+    <label>Annonceur<input class="input" name="sponsor" maxlength="100" required></label>
+    <label>Image HTTPS<input class="input" type="url" name="image_url" required></label>
+    <label>Destination HTTPS<input class="input" type="url" name="target_url" required></label>
+    <label>Début (UTC)<input class="input" type="datetime-local" name="starts_at" required></label>
+    <label>Fin (UTC)<input class="input" type="datetime-local" name="ends_at" required></label>
+  </div>
+  <label>Description<textarea class="input" name="description" maxlength="300" required></textarea></label>
+  <fieldset class="comfort-checks"><legend>Emplacements</legend>{% for key,label in [('home','Dashboard'),('catalog','Films et séries'),('reader','Après la lecture'),('actor_break','Entre les fiches acteurs')] %}<label><input type="checkbox" name="placement" value="{{ key }}"> {{ label }}</label>{% endfor %}</fieldset>
+  <button class="btn btn-primary" type="submit">Enregistrer la campagne</button>
+  <button class="btn btn-ghost" type="button" id="advertisingOff">Tout désactiver</button>
+</form>
+<p id="advertisingStatus" role="status">Chargement…</p>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static',filename='js/advertising-admin.js') }}"></script>{% endblock %}

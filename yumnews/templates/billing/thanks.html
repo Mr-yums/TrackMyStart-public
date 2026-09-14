@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Merci{% endblock %}
+{% block content %}
+<div class="empty-state">
+  {% if payment and payment.status == 'succeeded' %}
+    <h1>Merci ! 🎉</h1><p>Votre accès Premium est actif. Bon visionnage.</p>
+  {% elif payment and payment.status == 'pending' %}
+    <h1>Paiement en attente</h1><p>Nous attendons la confirmation du réseau. Cette page se mettra à jour automatiquement.</p>
+    <script>const id={{ payment.order_id|tojson }};const t=setInterval(async()=>{const r=await fetch('/abonnement/statut/'+id).then(r=>r.json()).catch(()=>null);if(r&&r.status!=='pending'){clearInterval(t);location.reload();}},5000);</script>
+  {% elif payment %}
+    <h1>Paiement non abouti</h1><p>{{ payment.error_message or "Le paiement n'a pas été confirmé." }}</p>
+  {% else %}
+    <h1>Commande introuvable</h1>
+  {% endif %}
+  <a class="btn btn-primary" href="{{ url_for('dashboard.app') }}">Aller au dashboard</a>
+</div>
+{% endblock %}
