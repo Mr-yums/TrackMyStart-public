@@ -43,13 +43,20 @@ elif 'ops/smoke.py' in args:
     # [Sol] Le serveur réel est root ; la simulation CI ne change aucun propriétaire.
     install = binaries / "install"
     install.write_text("""#!/usr/bin/env python3
-import os,sys
+import sys
 from pathlib import Path
-assert sys.argv[1:-1] == ['-d','-m','700','-o','10001','-g','10001']
-if os.environ['FAILURE']=='advertising_storage':sys.exit(1)
+assert sys.argv[1:-1] == ['-d','-m','700']
 Path(sys.argv[-1]).mkdir(parents=True,exist_ok=True)
 """)
     install.chmod(0o755)
+    # Le propriétaire est fixé par chown (UID numérique accepté par uutils) ; la panne de stockage est simulée ici.
+    chown = binaries / "chown"
+    chown.write_text("""#!/usr/bin/env python3
+import os,sys
+assert sys.argv[1] == '10001:10001' and len(sys.argv) == 3
+if os.environ['FAILURE']=='advertising_storage':sys.exit(1)
+""")
+    chown.chmod(0o755)
     sleep = binaries / "sleep"
     sleep.write_text("#!/bin/sh\nexit 0\n")
     sleep.chmod(0o755)
