@@ -73,6 +73,15 @@ if [[ -f "$ROOT/proxy/Caddyfile" ]]; then cp "$ROOT/proxy/Caddyfile" "$ROOT/prox
 cat > "$ROOT/proxy/Caddyfile.next" <<CADDY
 trackmystart.de {
   encode zstd gzip
+  # [OXIO · Fable 5.1 · 15/09/2026] En-têtes de durcissement ; le CSP se limite au cadrage pour ne pas casser les scripts et images du site.
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Content-Security-Policy "frame-ancestors 'self'"
+    X-Content-Type-Options nosniff
+    Referrer-Policy strict-origin-when-cross-origin
+    Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    -Server
+  }
   import /etc/caddy/publisher/*.caddy
   reverse_proxy $CANDIDATE:8800
 }
