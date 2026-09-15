@@ -30,7 +30,8 @@ fi
 "${COMPOSE[@]}" exec -T db pg_dump -U trackmystart -d trackmystart -Fc > "$ROOT/backups/before-$RELEASE.dump"
 test -s "$ROOT/backups/before-$RELEASE.dump"
 # [Sol] Campagne persistante hors des images, writable uniquement par l'application.
-install -d -m 700 -o 10001 -g 10001 "$ROOT/data/advertising"
+# Ubuntu 26.04 (uutils coreutils) : install -o refuse un UID numérique sans entrée passwd ; chown l'accepte.
+mkdir -p "$ROOT/data/advertising" && chmod 700 "$ROOT/data/advertising" && chown 10001:10001 "$ROOT/data/advertising"
 if [[ -f "$ROOT/data/advertising/advertising.json" ]]; then
   cp -p "$ROOT/data/advertising/advertising.json" "$ROOT/backups/advertising-before-$RELEASE.json"
 fi
