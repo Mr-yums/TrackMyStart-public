@@ -1,4 +1,4 @@
-"""[OXIO] Rabatteurs + agrégats de rabatage (clients amenés, commission due)."""
+"""Rabatteurs + agrégats de rabatage (clients amenés, commission due)."""
 
 from __future__ import annotations
 

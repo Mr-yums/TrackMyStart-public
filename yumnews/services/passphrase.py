@@ -1,4 +1,4 @@
-"""[OXIO] Génération du seed premium : jeton opaque copiable-collable, façon clé BTC.
+"""Génération du seed premium : jeton opaque copiable-collable, façon clé BTC.
 
 Chaîne alphanumérique minuscule (``[a-z0-9]``), sans caractère ambigu de séparation,
 à très forte entropie : le client la copie-colle telle quelle dans le bot Discord.

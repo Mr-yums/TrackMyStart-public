@@ -73,7 +73,7 @@ def register_cli(app: Flask, container: Container) -> None:
     @click.argument("email")
     @click.argument("password", required=False)
     def set_password(email: str, password: str | None) -> None:
-        """[OXIO] Régénère (ou fixe) le mot de passe d'un compte — test/support, usage local.
+        """Régénère (ou fixe) le mot de passe d'un compte — test/support, usage local.
 
         Sans argument PASSWORD, un mot de passe aléatoire est généré et affiché.
         Les mots de passe restent hashés en base : on ne peut que les réécrire, jamais les relire.
@@ -105,7 +105,7 @@ def register_cli(app: Flask, container: Container) -> None:
                 f"{'OK ' if articles else 'KO '} {source.key:20s} {len(articles):3d}  {source.url}"
             )
 
-    # ---- coupons & rabatteurs [OXIO] --------------------------------
+    # ---- coupons & rabatteurs --------------------------------
     @app.cli.command("create-affiliate")
     @click.argument("name")
     @click.option("--email", default=None, help="Contact du rabatteur.")

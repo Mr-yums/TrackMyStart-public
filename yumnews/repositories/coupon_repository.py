@@ -1,4 +1,4 @@
-"""[OXIO] Accès aux coupons et à leurs utilisations (redemptions)."""
+"""Accès aux coupons et à leurs utilisations (redemptions)."""
 
 from __future__ import annotations
 

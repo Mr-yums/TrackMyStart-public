@@ -46,7 +46,7 @@ def account():
             flash(exc.message, "error")
     passphrase = PassphraseRepository(session).active_for_user(
         entity.id
-    )  # [OXIO] seed premium Discord (client rabatteur)
+    )  # seed premium Discord (client rabatteur)
     return render_template(
         "dashboard/account.html",
         form=form,

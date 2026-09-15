@@ -70,7 +70,7 @@ class InvoiceIssuer:
 @dataclass(frozen=True)
 class PremiumOffer:
     price_cents: int = (
-        2000  # [OXIO] tarif de base 20 € (les codes rabatteur/promo réduisent ce prix)
+        2000  # tarif de base 20 € (les codes rabatteur/promo réduisent ce prix)
     )
     period_days: int = 30
     currency: str = "EUR"
@@ -114,7 +114,7 @@ class Settings:
     smtp_password: str = field(default="", repr=False)
     sendgrid_api_key: str = ""
     mail_from: str = "no-reply@trackmystart.de"
-    # [OXIO] Rabatage : commission = % (après URSSAF) de chaque paiement amené par un code rabatteur.
+    # Rabatage : commission = % (après URSSAF) de chaque paiement amené par un code rabatteur.
     urssaf_rate_percent: int = 22
     affiliate_commission_percent: int = 21
 

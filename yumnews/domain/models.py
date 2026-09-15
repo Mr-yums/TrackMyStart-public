@@ -293,7 +293,7 @@ class InvoiceSnapshot(Base):
 
 
 class Affiliate(TimestampMixin, Base):
-    """[OXIO] Rabatteur : apporteur d'affaires rémunéré à la commission sur chaque paiement amené."""
+    """Rabatteur : apporteur d'affaires rémunéré à la commission sur chaque paiement amené."""
 
     __tablename__ = "affiliates"
 
@@ -309,7 +309,7 @@ class Affiliate(TimestampMixin, Base):
 
 
 class Coupon(TimestampMixin, Base):
-    """[OXIO] Code de réduction. Rattaché à un rabatteur (``affiliate_id``) ou promo générique."""
+    """Code de réduction. Rattaché à un rabatteur (``affiliate_id``) ou promo générique."""
 
     __tablename__ = "coupons"
     __table_args__ = (UniqueConstraint("code", name="uq_coupon_code"),)
@@ -340,7 +340,7 @@ class Coupon(TimestampMixin, Base):
 
 
 class Redemption(TimestampMixin, Base):
-    """[OXIO] Une utilisation d'un coupon ayant abouti à un paiement réussi ; commission figée."""
+    """Une utilisation d'un coupon ayant abouti à un paiement réussi ; commission figée."""
 
     __tablename__ = "redemptions"
 
@@ -369,7 +369,7 @@ class Redemption(TimestampMixin, Base):
 
 
 class DiscordPassphrase(TimestampMixin, Base):
-    """[OXIO] Seed copiable-collable remis au client venu via un rabatteur, pour entrer sur le Discord.
+    """Seed copiable-collable remis au client venu via un rabatteur, pour entrer sur le Discord.
 
     Une seule passphrase active par client. Le futur bot la valide (usage unique via ``status``).
     """

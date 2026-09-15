@@ -1,4 +1,4 @@
-"""[OXIO] Coupons de réduction et rabatteurs.
+"""Coupons de réduction et rabatteurs.
 
 Deux usages couverts par un seul moteur :
 - **Code rabatteur** : coupon ``FIXED`` à 1200 (→ 12 €), rattaché à un ``Affiliate``, sans limite

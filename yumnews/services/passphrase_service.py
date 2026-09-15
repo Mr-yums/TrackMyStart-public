@@ -1,4 +1,4 @@
-"""[OXIO] Passphrases Discord : émission à la redemption d'un code rabatteur, validation par le bot.
+"""Passphrases Discord : émission à la redemption d'un code rabatteur, validation par le bot.
 
 Le bot Discord n'existe pas encore ; cette couche est prête pour lui. Côté produit :
 - ``issue_for`` est appelé par ``CouponService`` quand un paiement via rabatteur réussit ;

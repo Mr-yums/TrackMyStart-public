@@ -1,4 +1,4 @@
-"""[OXIO] Passphrases Discord remises aux clients venus via un rabatteur."""
+"""Passphrases Discord remises aux clients venus via un rabatteur."""
 
 from __future__ import annotations
 

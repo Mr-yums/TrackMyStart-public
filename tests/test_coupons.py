@@ -1,4 +1,4 @@
-"""[OXIO] Coupons, rabatteurs (commission après URSSAF) et passphrases Discord.
+"""Coupons, rabatteurs (commission après URSSAF) et passphrases Discord.
 
 Prix de base : 2000 (20 €). Code rabatteur → prix fixe 12 € + commission + passphrase ;
 promo découverte → -20 % plafonnée par compte ; paiement refusé → aucune redemption.
